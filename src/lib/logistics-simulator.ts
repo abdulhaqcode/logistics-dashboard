@@ -1,5 +1,6 @@
 import type {
   ActivityItem,
+  ActivityType,
   HubLoad,
   Kpis,
   LiveSnapshot,
@@ -211,16 +212,15 @@ export function tickSnapshot(prev: LiveSnapshot): LiveSnapshot {
         : o.status === "exception"
           ? `Exception on ${o.ref} — ops notified`
           : `${o.ref} → ${o.status.replace(/_/g, " ")}`;
-    activity = [
-      {
-        id: randomId(),
-        ts: new Date().toISOString(),
-        message: msg,
-        type:
-          o.status === "exception" ? "warning" : o.status === "delivered" ? "success" : "info",
-      },
-      ...activity,
-    ].slice(0, 40);
+    const eventType: ActivityType =
+      o.status === "exception" ? "warning" : o.status === "delivered" ? "success" : "info";
+    const newItem: ActivityItem = {
+      id: randomId(),
+      ts: new Date().toISOString(),
+      message: msg,
+      type: eventType,
+    };
+    activity = [newItem, ...activity].slice(0, 40);
   }
 
   const hubs = prev.hubs.map((h) => ({
